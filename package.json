@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "activity for demonstrating inquirer with mysql",
   "main": "index.js",
-  "start": "node index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "console.table": "^0.10.0",
     "dotenv": "^8.2.0",
