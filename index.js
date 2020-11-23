@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -33,6 +33,10 @@ function start() {
             viewRoles();
         } else if(answer.actionChoice === "View Employees") {
             viewEmployees();
+        } else if(answer.actionChoice === "View Employees by Department") {
+            viewEmployeesByDepartment();
+        } else if(answer.actionChoice === "View Employees by Role") {
+            viewEmployeesByRole();
         } else if(answer.actionChoice === "Add Department") {
             addDepartment();
         } else if(answer.actionChoice === "Add Role") {
@@ -47,7 +51,7 @@ function start() {
     });
 };
   
-function viewDepartments() {
+function viewEmployeesByDepartment() {
     connection.query("SELECT name FROM department", function(err, res) {
         if(err){
             throw err
@@ -83,7 +87,7 @@ function viewDepartments() {
     });
 };
 
-function viewRoles() {
+function viewEmployeesByRole() {
     connection.query("SELECT title FROM role", function(err, res) {
         if(err){
             throw err
