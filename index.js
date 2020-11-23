@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require('console.table');
 require("dotenv").config();
+let filtered = [];
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -69,14 +70,13 @@ function viewDepartments() {
                 if(err){
                     throw err
                 }
-                let filtered = res.filter(employee => employee.department === selectedDepartment)
-                // forEach(employee => {
-                //     if(employee.department === selectedDepartment){
-                //         filtered.push(employee)
-                //     }
-                // })
+                filtered = res.filter(employee => employee.department === selectedDepartment)
+                console.log("")
+                console.log("----------------------------------------------------------------------------------")
                 console.log(selectedDepartment)
+                console.log("")
                 console.table(filtered);
+                console.log("----------------------------------------------------------------------------------")
                 start();
             });
         });
@@ -84,13 +84,38 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    inquirer
-    .prompt([
-    
-    ])
-    .then(function(response) {
+    connection.query("SELECT title FROM role", function(err, res) {
+        if(err){
+            throw err
+        }
+        let roles = [];
+        res.forEach(role => roles.push(role.title))
+        inquirer
+        .prompt([
+            {
+            name: "selectedRole",
+            type: "list",
+            choices: roles,
+            message: "What role would you like to see?"
+            }
+        ]).then(function(response){
+            let selectedRole = response.selectedRole
+            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
 
-        start();
+            connection.query(query, function(err, res) {
+                if(err){
+                    throw err
+                }
+                filtered = res.filter(employee => employee.title === selectedRole)
+                console.log("")
+                console.log("----------------------------------------------------------------------------------")
+                console.log(selectedRole)
+                console.log("")
+                console.table(filtered);
+                console.log("----------------------------------------------------------------------------------")
+                start();
+            });
+        });
     });
 };
 
@@ -101,8 +126,12 @@ function viewEmployees() {
         if(err){
             throw err
         }
+    console.log("")
+    console.log("----------------------------------------------------------------------------------")
     console.log("Employees")
+    console.log("")
     console.table(res);
+    console.log("----------------------------------------------------------------------------------")
     start();
     });
 };
