@@ -154,16 +154,17 @@ function viewEmployeesByRole() {
                 if (filtered.length === 0){
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedRole + " has no employees")
+                    console.log("Currently there are no employees in the " + selectedRole + " role.")
                     console.log("----------------------------------------------------------------------------------")
                     console.log("")
-                }
-                console.log("")
-                console.log("----------------------------------------------------------------------------------")
-                console.log(selectedRole)
-                console.log("")
-                console.table(filtered);
-                console.log("----------------------------------------------------------------------------------")
+                } else {
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedRole)
+                    console.log("")
+                    console.table(filtered);
+                    console.log("----------------------------------------------------------------------------------")
+                }   
                 start();
             });
         });
