@@ -59,6 +59,8 @@ function viewDepartments(){
         }
         console.log("")
         console.log("----------------------------------------------------------------------------------")
+        console.log("Departments")
+        console.log("------------")
         res.forEach(department => console.log(department.name))
         console.log("----------------------------------------------------------------------------------")
         console.log("")
@@ -73,6 +75,8 @@ function viewRoles(){
         }
         console.log("")
         console.log("----------------------------------------------------------------------------------")
+        console.log("Roles")
+        console.log("------")
         res.forEach(role => console.log(role.title))
         console.log("----------------------------------------------------------------------------------")
         console.log("")
@@ -104,6 +108,13 @@ function viewEmployeesByDepartment() {
                     throw err
                 }
                 filtered = res.filter(employee => employee.department === selectedDepartment)
+                if (filtered.length === 0){
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedDepartment + " has no employees")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log("")
+                }
                 console.log("")
                 console.log("----------------------------------------------------------------------------------")
                 console.log(selectedDepartment)
@@ -140,6 +151,13 @@ function viewEmployeesByRole() {
                     throw err
                 }
                 filtered = res.filter(employee => employee.title === selectedRole)
+                if (filtered.length === 0){
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedRole + " has no employees")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log("")
+                }
                 console.log("")
                 console.log("----------------------------------------------------------------------------------")
                 console.log(selectedRole)
