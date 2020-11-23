@@ -101,7 +101,7 @@ function viewEmployeesByDepartment() {
             }
         ]).then(function(response){
             let selectedDepartment = response.selectedDepartment
-            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
+            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
 
             connection.query(query, function(err, res) {
                 if(err){
@@ -111,16 +111,17 @@ function viewEmployeesByDepartment() {
                 if (filtered.length === 0){
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedDepartment + " has no employees")
+                    console.log(selectedDepartment + " has no employees.")
                     console.log("----------------------------------------------------------------------------------")
                     console.log("")
-                }
+                } else {
                 console.log("")
                 console.log("----------------------------------------------------------------------------------")
                 console.log(selectedDepartment)
                 console.log("")
                 console.table(filtered);
                 console.log("----------------------------------------------------------------------------------")
+                }
                 start();
             });
         });
