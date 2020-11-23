@@ -197,13 +197,62 @@ function addDepartment() {
 };
 
 function addRole() {
-    inquirer
-    .prompt([
-    
-    ])
-    .then(function(response) {
-
-        start();
+    connection.query("SELECT name FROM department", function(err, res) {
+        if(err){
+            throw err
+        }
+        let departments = [];
+        res.forEach(department => departments.push(department.name))
+        inquirer
+        .prompt([
+            {
+                name: "newRole",
+                type: "input",
+                message: "What is the name of the new role?"
+            },
+            {
+                name: "newSalary",
+                type: "input",
+                message: "How much is the salary?"
+            },
+            {
+                name: "roleDepartment",
+                type: "list",
+                choices: departments,
+                message: "What department is the role in?"
+            }
+        ])
+        .then(function(response) {
+            let newRole = response.newRole
+            let newSalary = parseInt(response.newSalary)
+            let roleDepartment = response.roleDepartment
+            connection.query(
+                "SELECT id FROM department WHERE name = ?", [roleDepartment], function(err, res){
+                    if (err) {
+                        throw err
+                    }
+                    connection.query(
+                        "INSERT INTO role SET ?",
+                        {
+                        title: newRole,
+                        salary: newSalary,
+                        department_id: res[0].id
+                        },
+                        function(err) {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(`${newRole} was added as a role for ${roleDepartment}.`);
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                        start();
+                        }
+                    );
+                }
+            )
+        });
     });
 };
 
