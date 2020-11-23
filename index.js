@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -46,6 +46,8 @@ function start() {
             addEmployee();
         } else if(answer.actionChoice === "Update Employee Role") {
             updateEmployeeRole();
+        } else if(answer.actionChoice === "Update Employee Manager") {
+            updateEmployeeManager();
         } else{
           connection.end();
         };
@@ -455,6 +457,57 @@ function updateEmployeeRole() {
                     }
                 );
             });
+        });
+    });
+};
+
+function updateEmployeeManager() {
+    connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee", function(err, res) {
+        if(err){
+            throw err
+        }
+        let employees = res;
+        let employeeNames = res.map(employee => employee.name)
+        inquirer
+        .prompt([
+            {
+                name: "updatingEmployee",
+                type: "list",
+                choices: employeeNames,
+                message: "What employee would you like to update?"
+            },
+            {
+                name: "newManager",
+                type: "list",
+                choices: employeeNames,
+                message: "Who is the new manager for this employee?"
+            }
+        ])
+        .then(function(response) {
+            let updatingEmployee = employees.filter(employee => employee.name === response.updatingEmployee)
+            let employeeId = updatingEmployee[0].id
+            let employeeManager = employees.filter(employee => employee.name === response.newManager)
+            let employeeManagerId = employeeManager[0].id;
+            connection.query(
+                "UPDATE employee SET ? WHERE ?",
+                [
+                    {
+                    manager_id: employeeManagerId
+                    },
+                    {
+                    id: employeeId
+                    }
+                ],
+                function(error) {
+                    if (error) throw err;
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(`${updatingEmployee[0].name} has been updated to report to ${employeeManager[0].name}`);
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log("")
+                    start();
+                }
+            );
         });
     });
 };
