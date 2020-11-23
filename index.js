@@ -308,7 +308,6 @@ function addEmployee() {
                     employeeManager = managers.filter(manager => manager.manager === response.employeeManager)
                     employeeManagerId = employeeManager[0].id
                 }
-                console.log(firstName, lastName, employeeManagerId, employeeRoleId)
                 connection.query(
                     "INSERT INTO employee SET ?",
                     {
@@ -335,12 +334,63 @@ function addEmployee() {
 };
 
 function updateEmployeeRole() {
-    inquirer
-    .prompt([
-    
-    ])
-    .then(function(response) {
-
-        start();
+    connection.query("SELECT id, title FROM role", function(err, res) {
+        if(err){
+            throw err
+        }
+        let roles = res;
+        let roleTitles = res.map(role => role.title)
+        connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee", function(err, res) {
+            if(err){
+                throw err
+            }
+            let employees = res;
+            let employeeNames = res.map(employee => employee.name)
+            inquirer
+            .prompt([
+                {
+                    name: "updatingEmployee",
+                    type: "list",
+                    choices: employeeNames,
+                    message: "What employee would you like to update?"
+                },
+                {
+                    name: "newRole",
+                    type: "list",
+                    choices: roleTitles,
+                    message: "What is the new role for this employee?"
+                }
+            ])
+            .then(function(response) {
+                let updatingEmployee = employees.filter(employee => employee.name === response.updatingEmployee)
+                let employeeId = updatingEmployee[0].id
+                let employeeRole = roles.filter(role => role.title === response.newRole)
+                let employeeRoleId = employeeRole[0].id;
+                connection.query(
+                    "UPDATE employee SET ? WHERE ?",
+                    [
+                      {
+                        role_id: employeeRoleId
+                      },
+                      {
+                        id: employeeId
+                      }
+                    ],
+                    function(error) {
+                      if (error) throw err;
+                      console.log("")
+                      console.log("----------------------------------------------------------------------------------")
+                      console.log(`${updatingEmployee[0].name} has been updated to a ${employeeRole[0].title}`);
+                      console.log("----------------------------------------------------------------------------------")
+                      console.log("")
+                      start();
+                    }
+                );
+            });
+        });
     });
 };
+
+
+
+   
