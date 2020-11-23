@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -36,6 +36,8 @@ function start() {
             viewEmployeesByDepartment();
         } else if(answer.actionChoice === "View Employees by Role") {
             viewEmployeesByRole();
+        } else if(answer.actionChoice === "View Employees by Manager") {
+            viewEmployeesByManager();
         } else if(answer.actionChoice === "Add Department") {
             addDepartment();
         } else if(answer.actionChoice === "Add Role") {
@@ -149,6 +151,52 @@ function viewEmployeesByRole() {
         });
     });
 };
+
+function viewEmployeesByManager() {
+    connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name, manager_id FROM employee", function(err, res) {
+        if(err){
+            throw err
+        }
+        let employees = res;
+        let employeeNames = res.map(employee => employee.name)
+        inquirer
+        .prompt([
+            {
+            name: "managerSelected",
+            type: "list",
+            choices: employeeNames,
+            message: "What manager would you like to see?"
+            }
+        ]).then(function(response){
+            let managerSelected = response.managerSelected
+            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
+
+            connection.query(query, function(err, res) {
+                if(err){
+                    throw err
+                }
+                filtered = res.filter(employee => employee.manager === managerSelected)
+                if (filtered.length === 0) {
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(managerSelected + " has no direct reports")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log("")
+                } else {
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log("Direct Reports of " + managerSelected)
+                    console.log("")
+                    console.table(filtered);
+                    console.log("----------------------------------------------------------------------------------")
+                }
+                
+                start();
+            });
+        });
+    });
+};
+
 
 function viewEmployees() {
     let query = "SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e LEFT JOIN role ON e.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id"
