@@ -47,12 +47,40 @@ function start() {
 };
   
 function viewDepartments() {
-    connection.query(query, function(err, res) {
+    connection.query("SELECT name FROM department", function(err, res) {
         if(err){
             throw err
         }
-    console.table(res);
-    });   
+        let departments = [];
+        res.forEach(department => departments.push(department.name))
+        inquirer
+        .prompt([
+            {
+            name: "selectedDepartment",
+            type: "list",
+            choices: departments,
+            message: "What department would you like to see?"
+            }
+        ]).then(function(response){
+            let selectedDepartment = response.selectedDepartment
+            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
+
+            connection.query(query, function(err, res) {
+                if(err){
+                    throw err
+                }
+                let filtered = res.filter(employee => employee.department === selectedDepartment)
+                // forEach(employee => {
+                //     if(employee.department === selectedDepartment){
+                //         filtered.push(employee)
+                //     }
+                // })
+                console.log(selectedDepartment)
+                console.table(filtered);
+                start();
+            });
+        });
+    });
 };
 
 function viewRoles() {
@@ -73,6 +101,7 @@ function viewEmployees() {
         if(err){
             throw err
         }
+    console.log("Employees")
     console.table(res);
     start();
     });
