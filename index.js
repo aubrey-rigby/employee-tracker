@@ -257,13 +257,80 @@ function addRole() {
 };
 
 function addEmployee() {
-    inquirer
-    .prompt([
-    
-    ])
-    .then(function(response) {
-
-        start();
+    connection.query("SELECT id, title FROM role", function(err, res) {
+        if(err){
+            throw err
+        }
+        let roles = res;
+        let roleTitles = res.map(role => role.title)
+        connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS manager FROM employee", function(err, res) {
+            if(err){
+                throw err
+            }
+            let managers = res
+            let managerNames = managers.map(manager => manager.manager)
+            managerNames.push("None")
+            inquirer
+            .prompt([
+                {
+                    name: "firstName",
+                    type: "input",
+                    message: "What is the first name of the new employee?"
+                },
+                {
+                    name: "lastName",
+                    type: "input",
+                    message: "What is the last name of the new employee?"
+                },
+                {
+                    name: "employeeRole",
+                    type: "list",
+                    choices: roleTitles,
+                    message: "What is the role of the new employee?"
+                },
+                {
+                    name: "employeeManager",
+                    type: "list",
+                    choices: managerNames,
+                    message: "What department is the role in?"
+                }
+            ])
+            .then(function(response) {
+                let firstName = response.firstName
+                let lastName = response.lastName
+                let employeeRole = roles.filter(role => role.title === response.employeeRole)
+                let employeeRoleId = employeeRole[0].id;
+                let employeeManager;
+                let employeeManagerId;
+                if (response.employeeManager === "None") {
+                    employeeManagerId = null
+                } else {
+                    employeeManager = managers.filter(manager => manager.manager === response.employeeManager)
+                    employeeManagerId = employeeManager[0].id
+                }
+                console.log(firstName, lastName, employeeManagerId, employeeRoleId)
+                connection.query(
+                    "INSERT INTO employee SET ?",
+                    {
+                    first_name: firstName,
+                    last_name: lastName,
+                    role_id: employeeRoleId,
+                    manager_id: employeeManagerId
+                    },
+                    function(err) {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(`${firstName} ${lastName} was added as a ${employeeRole[0].title}.`);
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log("")
+                    start();
+                    }
+                );
+            });
+        });
     });
 };
 
