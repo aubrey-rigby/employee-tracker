@@ -47,14 +47,12 @@ function start() {
 };
   
 function viewDepartments() {
-    inquirer
-    .prompt([
-    
-    ])
-    .then(function(response) {
-
-        start();
-    });
+    connection.query(query, function(err, res) {
+        if(err){
+            throw err
+        }
+    console.table(res);
+    });   
 };
 
 function viewRoles() {
@@ -69,13 +67,14 @@ function viewRoles() {
 };
 
 function viewEmployees() {
-    inquirer
-    .prompt([
-    
-    ])
-    .then(function(response) {
+    let query = "SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e LEFT JOIN role ON e.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id"
 
-        start();
+    connection.query(query, function(err, res) {
+        if(err){
+            throw err
+        }
+    console.table(res);
+    start();
     });
 };
 
