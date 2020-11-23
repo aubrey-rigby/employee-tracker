@@ -28,8 +28,7 @@ function start() {
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
           viewDepartments();
-        }
-        else if(answer.actionChoice === "View Roles") {
+        } else if(answer.actionChoice === "View Roles") {
             viewRoles();
         } else if(answer.actionChoice === "View Employees") {
             viewEmployees();
@@ -171,11 +170,29 @@ function viewEmployees() {
 function addDepartment() {
     inquirer
     .prompt([
-    
+        {
+        name: "newDepartment",
+        type: "input",
+        message: "What is the name of the new department?"
+        }
     ])
     .then(function(response) {
-
-        start();
+        let newDepartment = response.newDepartment
+        connection.query(
+            "INSERT INTO department SET ?",
+            {
+              name: newDepartment,
+            },
+            function(err) {
+              if (err) throw err;
+              console.log("")
+              console.log("----------------------------------------------------------------------------------")
+              console.log(newDepartment + " was added as a department.");
+              console.log("----------------------------------------------------------------------------------")
+              console.log("")
+              start();
+            }
+          );
     });
 };
 
