@@ -50,6 +50,34 @@ function start() {
         };
     });
 };
+
+function viewDepartments(){
+    connection.query("SELECT name FROM department", function(err, res) {
+        if(err){
+            throw err
+        }
+        console.log("")
+        console.log("----------------------------------------------------------------------------------")
+        res.forEach(department => console.log(department.name))
+        console.log("----------------------------------------------------------------------------------")
+        console.log("")
+        start();
+    });
+}
+
+function viewRoles(){
+    connection.query("SELECT title FROM role", function(err, res) {
+        if(err){
+            throw err
+        }
+        console.log("")
+        console.log("----------------------------------------------------------------------------------")
+        res.forEach(role => console.log(role.title))
+        console.log("----------------------------------------------------------------------------------")
+        console.log("")
+        start();
+    });
+}
   
 function viewEmployeesByDepartment() {
     connection.query("SELECT name FROM department", function(err, res) {
