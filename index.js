@@ -292,7 +292,7 @@ function addEmployee() {
                     name: "employeeManager",
                     type: "list",
                     choices: managerNames,
-                    message: "What department is the role in?"
+                    message: "Who is the employee's manager?"
                 }
             ])
             .then(function(response) {
