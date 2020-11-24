@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "See Utilized Budget of Department", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -49,11 +49,13 @@ function start() {
         } else if(answer.actionChoice === "Update Employee Manager") {
             updateEmployeeManager();
         } else if(answer.actionChoice === "Delete Department") {
-            DeleteDepartment();
+            deleteDepartment();
         } else if(answer.actionChoice === "Delete Role") {
-            DeleteRole();
+            deleteRole();
         } else if(answer.actionChoice === "Delete Employee") {
-            DeleteEmployee();
+            deleteEmployee();
+        } else if(answer.actionChoice === "See Utilized Budget of Department") {
+            departmentBudget();
         } else{
           connection.end();
         };
@@ -601,7 +603,7 @@ function updateEmployeeManager() {
     });
 };
 
-function DeleteDepartment() {
+function deleteDepartment() {
     connection.query("SELECT name FROM department", function(err, res) {
         if(err){
             throw err
@@ -659,7 +661,7 @@ function DeleteDepartment() {
     });
 };
 
-function DeleteRole() {
+function deleteRole() {
     connection.query("SELECT title FROM role", function(err, res) {
         if(err){
             throw err
@@ -717,7 +719,7 @@ function DeleteRole() {
     });
 };
 
-function DeleteEmployee() {
+function deleteEmployee() {
     connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee", function(err, res) {
         if(err){
             throw err
@@ -775,4 +777,59 @@ function DeleteEmployee() {
             });
         };
     });
-};   
+}; 
+
+function departmentBudget() {
+    connection.query("SELECT name FROM department", function(err, res) {
+        if(err){
+            throw err
+        }
+        if (res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No departments found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let departments = [];
+            res.forEach(department => departments.push(department.name))
+            inquirer
+            .prompt([
+                {
+                name: "selectedDepartment",
+                type: "list",
+                choices: departments,
+                message: "What department's budget would you like to see?"
+                }
+            ]).then(function(response){
+                let selectedDepartment = response.selectedDepartment
+                let query = `SELECT employee.id, role.salary, department.name AS department FROM employee LEFT JOIN role ON role_id = role.id LEFT JOIN department ON role.department_id = department.id`
+
+                connection.query(query, function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    filtered = res.filter(employee => employee.department === selectedDepartment)
+                    if (filtered.length === 0){
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(selectedDepartment + " has no employees.")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                    } else {
+                        let utilizedBudget = 0;
+                        let salaries = filtered.map(employee => parseInt(employee.salary))
+                        salaries.forEach(salary => utilizedBudget = utilizedBudget + salary)
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(`The utitlized budget of ${selectedDepartment} is ${utilizedBudget}.`)
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                    }
+                start();
+                });
+            });
+        }
+    });
+}
