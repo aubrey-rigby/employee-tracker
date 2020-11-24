@@ -1,4 +1,4 @@
-# Employee Tracker 
+# Employee Tracker [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Table of Contents
 * [Description](#description)
@@ -31,7 +31,7 @@ To use this project:
 </ol>
 
 ## License
-This repository has a  license. For more information on this license, please visit: https://choosealicense.com/licenses/     
+This repository has a MIT license. For more information on this license, please visit: https://choosealicense.com/licenses/mit    
 
 ## Contributing
 Contributions to this project are welcome!
