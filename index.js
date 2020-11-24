@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Delete Employee", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -52,6 +52,8 @@ function start() {
             DeleteDepartment();
         } else if(answer.actionChoice === "Delete Role") {
             DeleteRole();
+        } else if(answer.actionChoice === "Delete Employee") {
+            DeleteEmployee();
         } else{
           connection.end();
         };
@@ -614,4 +616,53 @@ function DeleteRole() {
     });
 };
 
-   
+function DeleteEmployee() {
+    connection.query("SELECT id, CONCAT(first_name, last_name) AS name FROM employee", function(err, res) {
+        if(err){
+            throw err
+        }
+        let employees = res;
+        let employeeNames = [];
+        res.forEach(employee => employeeNames.push(employee.name))
+        inquirer
+        .prompt([
+            {
+            name: "selectedEmployee",
+            type: "list",
+            choices: employeeNames,
+            message: "Which employee would you like to delete?"
+            },
+            {
+                name: "confirm",
+                type: "list",
+                choices: ["Yes", "Cancel"],
+                message: "Are you sure you want to delete this employee?"
+            }
+        ]).then(function(response){
+            let confirm = response.confirm
+            let selectedEmployee = employees.filter(employee => employee.name === response.selectedEmployee);
+            let selectedEmployeeId = selectedEmployee[0].id
+            if (confirm === "Yes"){
+                connection.query("DELETE FROM employee WHERE ?", 
+                [{
+                   id: selectedEmployeeId
+                }],
+                function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedEmployee[0].name +" deleted.")
+                    console.log("----------------------------------------------------------------------------------")
+                });  
+            } else {
+                console.log("")
+                console.log("----------------------------------------------------------------------------------")
+                console.log("Successfully canceled.")
+                console.log("----------------------------------------------------------------------------------")
+            };
+            start();
+        });
+    });
+};   
