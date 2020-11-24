@@ -25,6 +25,7 @@ To install necessary dependencies, run the following command: npm i
 To use this project: 
 <ol>
 <li>Clone the repository: "git@github.com:aubrey-heim/employee-tracker.git"</li>
+<li>Update line 11 of index.js with your MySQL password</li>
 <li>Run the schema.sql in MySQL workbench</li>
 <li>Install the dependencies using “npm i” in the terminal</li>
 <li>Run the application using “npm start”</li>
