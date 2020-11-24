@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Delete Role", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -50,6 +50,8 @@ function start() {
             updateEmployeeManager();
         } else if(answer.actionChoice === "Delete Department") {
             DeleteDepartment();
+        } else if(answer.actionChoice === "Delete Role") {
+            DeleteRole();
         } else{
           connection.end();
         };
@@ -550,6 +552,55 @@ function DeleteDepartment() {
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
                     console.log(selectedDepartment +" deleted.")
+                    console.log("----------------------------------------------------------------------------------")
+                });  
+            } else {
+                console.log("")
+                console.log("----------------------------------------------------------------------------------")
+                console.log("Successfully canceled.")
+                console.log("----------------------------------------------------------------------------------")
+            };
+            start();
+        });
+    });
+};
+
+function DeleteRole() {
+    connection.query("SELECT title FROM role", function(err, res) {
+        if(err){
+            throw err
+        }
+        let roles = [];
+        res.forEach(role => roles.push(role.title))
+        inquirer
+        .prompt([
+            {
+            name: "selectedRole",
+            type: "list",
+            choices: roles,
+            message: "What role would you like to delete?"
+            },
+            {
+                name: "confirm",
+                type: "list",
+                choices: ["Yes", "Cancel"],
+                message: "Deleting a role will delete all employees in that role. Are you sure you want to delete this role?"
+            }
+        ]).then(function(response){
+            let confirm = response.confirm
+            let selectedRole = response.selectedRole
+            if (confirm === "Yes"){
+                connection.query("DELETE FROM role WHERE ?", 
+                [{
+                    title: selectedRole
+                }],
+                function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedRole +" deleted.")
                     console.log("----------------------------------------------------------------------------------")
                 });  
             } else {
