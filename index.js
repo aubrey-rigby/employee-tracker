@@ -23,7 +23,7 @@ function start() {
         name: "actionChoice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Exit"]
+        choices: ["View Departments", "View Roles", "View Employees", "View Employees by Department", "View Employees by Role", "View Employees by Manager", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Delete Department", "Exit"]
     })
     .then(function(answer) {
         if (answer.actionChoice === "View Departments") {
@@ -48,6 +48,8 @@ function start() {
             updateEmployeeRole();
         } else if(answer.actionChoice === "Update Employee Manager") {
             updateEmployeeManager();
+        } else if(answer.actionChoice === "Delete Department") {
+            DeleteDepartment();
         } else{
           connection.end();
         };
@@ -502,7 +504,7 @@ function updateEmployeeManager() {
                     if (error) throw err;
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(`${updatingEmployee[0].name} has been updated to report to ${employeeManager[0].name}`);
+                    console.log(`${updatingEmployee[0].name} has been updated to report to ${employeeManager[0].name}.`);
                     console.log("----------------------------------------------------------------------------------")
                     console.log("")
                     start();
@@ -512,6 +514,53 @@ function updateEmployeeManager() {
     });
 };
 
-
+function DeleteDepartment() {
+    connection.query("SELECT name FROM department", function(err, res) {
+        if(err){
+            throw err
+        }
+        let departments = [];
+        res.forEach(department => departments.push(department.name))
+        inquirer
+        .prompt([
+            {
+            name: "selectedDepartment",
+            type: "list",
+            choices: departments,
+            message: "What department would you like to delete?"
+            },
+            {
+                name: "confirm",
+                type: "list",
+                choices: ["Yes", "Cancel"],
+                message: "Deleting a department will delete all job roles and employees in that department. Are you sure you want to delete this department?"
+            }
+        ]).then(function(response){
+            let confirm = response.confirm
+            let selectedDepartment = response.selectedDepartment
+            if (confirm === "Yes"){
+                connection.query("DELETE FROM department WHERE ?", 
+                [{
+                    name: selectedDepartment
+                }],
+                function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    console.log("")
+                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedDepartment +" deleted.")
+                    console.log("----------------------------------------------------------------------------------")
+                });  
+            } else {
+                console.log("")
+                console.log("----------------------------------------------------------------------------------")
+                console.log("Successfully canceled.")
+                console.log("----------------------------------------------------------------------------------")
+            };
+            start();
+        });
+    });
+};
 
    
