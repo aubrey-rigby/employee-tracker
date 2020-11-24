@@ -64,14 +64,23 @@ function viewDepartments(){
     connection.query("SELECT name FROM department", function(err, res) {
         if(err){
             throw err
+        } else if (res.length === 0) {
+            console.log("----------------------------------------------------------------------------------")
+            console.log("Departments")
+            console.log("------------")
+            console.log("No departments found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+        } else {
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("Departments")
+            console.log("------------")
+            res.forEach(department => console.log(department.name))
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
         }
-        console.log("")
-        console.log("----------------------------------------------------------------------------------")
-        console.log("Departments")
-        console.log("------------")
-        res.forEach(department => console.log(department.name))
-        console.log("----------------------------------------------------------------------------------")
-        console.log("")
+        
         start();
     });
 }
@@ -80,14 +89,23 @@ function viewRoles(){
     connection.query("SELECT title FROM role", function(err, res) {
         if(err){
             throw err
-        }
-        console.log("")
-        console.log("----------------------------------------------------------------------------------")
-        console.log("Roles")
-        console.log("------")
-        res.forEach(role => console.log(role.title))
-        console.log("----------------------------------------------------------------------------------")
-        console.log("")
+        } else if (res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("Roles")
+            console.log("------")
+            console.log("No roles found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+        } else {
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("Roles")
+            console.log("------")
+            res.forEach(role => console.log(role.title))
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+        } 
         start();
     });
 }
@@ -97,42 +115,51 @@ function viewEmployeesByDepartment() {
         if(err){
             throw err
         }
-        let departments = [];
-        res.forEach(department => departments.push(department.name))
-        inquirer
-        .prompt([
-            {
-            name: "selectedDepartment",
-            type: "list",
-            choices: departments,
-            message: "What department would you like to see?"
-            }
-        ]).then(function(response){
-            let selectedDepartment = response.selectedDepartment
-            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
+        if (res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No departments found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let departments = [];
+            res.forEach(department => departments.push(department.name))
+            inquirer
+            .prompt([
+                {
+                name: "selectedDepartment",
+                type: "list",
+                choices: departments,
+                message: "What department would you like to see?"
+                }
+            ]).then(function(response){
+                let selectedDepartment = response.selectedDepartment
+                let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
 
-            connection.query(query, function(err, res) {
-                if(err){
-                    throw err
-                }
-                filtered = res.filter(employee => employee.department === selectedDepartment)
-                if (filtered.length === 0){
+                connection.query(query, function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    filtered = res.filter(employee => employee.department === selectedDepartment)
+                    if (filtered.length === 0){
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(selectedDepartment + " has no employees.")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                    } else {
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedDepartment + " has no employees.")
-                    console.log("----------------------------------------------------------------------------------")
+                    console.log(selectedDepartment)
                     console.log("")
-                } else {
-                console.log("")
-                console.log("----------------------------------------------------------------------------------")
-                console.log(selectedDepartment)
-                console.log("")
-                console.table(filtered);
-                console.log("----------------------------------------------------------------------------------")
-                }
+                    console.table(filtered);
+                    console.log("----------------------------------------------------------------------------------")
+                    }
                 start();
+                });
             });
-        });
+        }
     });
 };
 
@@ -141,42 +168,51 @@ function viewEmployeesByRole() {
         if(err){
             throw err
         }
-        let roles = [];
-        res.forEach(role => roles.push(role.title))
-        inquirer
-        .prompt([
-            {
-            name: "selectedRole",
-            type: "list",
-            choices: roles,
-            message: "What role would you like to see?"
-            }
-        ]).then(function(response){
-            let selectedRole = response.selectedRole
-            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
-
-            connection.query(query, function(err, res) {
-                if(err){
-                    throw err
+        if (res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No roles found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let roles = [];
+            res.forEach(role => roles.push(role.title))
+            inquirer
+            .prompt([
+                {
+                name: "selectedRole",
+                type: "list",
+                choices: roles,
+                message: "What role would you like to see?"
                 }
-                filtered = res.filter(employee => employee.title === selectedRole)
-                if (filtered.length === 0){
-                    console.log("")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log("Currently there are no employees in the " + selectedRole + " role.")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log("")
-                } else {
-                    console.log("")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedRole)
-                    console.log("")
-                    console.table(filtered);
-                    console.log("----------------------------------------------------------------------------------")
-                }   
-                start();
+            ]).then(function(response){
+                let selectedRole = response.selectedRole
+                let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
+
+                connection.query(query, function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    filtered = res.filter(employee => employee.title === selectedRole)
+                    if (filtered.length === 0){
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("Currently there are no employees in the " + selectedRole + " role.")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                    } else {
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(selectedRole)
+                        console.log("")
+                        console.table(filtered);
+                        console.log("----------------------------------------------------------------------------------")
+                    }   
+                    start();                   
+                });
             });
-        });
+        }
     });
 };
 
@@ -185,46 +221,53 @@ function viewEmployeesByManager() {
         if(err){
             throw err
         }
-        let employees = res;
-        let employeeNames = res.map(employee => employee.name)
-        inquirer
-        .prompt([
-            {
-            name: "managerSelected",
-            type: "list",
-            choices: employeeNames,
-            message: "What manager would you like to see?"
-            }
-        ]).then(function(response){
-            let managerSelected = response.managerSelected
-            let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
+        if(res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No managers found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let employeeNames = res.map(employee => employee.name)
+            inquirer
+            .prompt([
+                {
+                name: "managerSelected",
+                type: "list",
+                choices: employeeNames,
+                message: "What manager would you like to see?"
+                }
+            ]).then(function(response){
+                let managerSelected = response.managerSelected
+                let query = `SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager  FROM employee e LEFT JOIN role ON e.role_id = role.id RIGHT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id `
 
-            connection.query(query, function(err, res) {
-                if(err){
-                    throw err
-                }
-                filtered = res.filter(employee => employee.manager === managerSelected)
-                if (filtered.length === 0) {
-                    console.log("")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log(managerSelected + " has no direct reports")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log("")
-                } else {
-                    console.log("")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log("Direct Reports of " + managerSelected)
-                    console.log("")
-                    console.table(filtered);
-                    console.log("----------------------------------------------------------------------------------")
-                }
-                
-                start();
+                connection.query(query, function(err, res) {
+                    if(err){
+                        throw err
+                    }
+                    filtered = res.filter(employee => employee.manager === managerSelected)
+                    if (filtered.length === 0) {
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(managerSelected + " has no direct reports")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                    } else {
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("Direct Reports of " + managerSelected)
+                        console.log("")
+                        console.table(filtered);
+                        console.log("----------------------------------------------------------------------------------")
+                    }
+                    
+                    start();
+                });
             });
-        });
+        }
     });
 };
-
 
 function viewEmployees() {
     let query = "SELECT e.id, e.first_name, e.last_name, role.title, role.salary, department.name AS department, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e LEFT JOIN role ON e.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee m ON e.manager_id = m.id"
@@ -233,13 +276,21 @@ function viewEmployees() {
         if(err){
             throw err
         }
-    console.log("")
-    console.log("----------------------------------------------------------------------------------")
-    console.log("Employees")
-    console.log("")
-    console.table(res);
-    console.log("----------------------------------------------------------------------------------")
-    start();
+        if(res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No employees found.")
+            console.log("----------------------------------------------------------------------------------")
+            start();
+        } else {
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("Employees")
+            console.log("")
+            console.table(res);
+            console.log("----------------------------------------------------------------------------------")
+            start();
+        }
     });
 };
 
@@ -277,58 +328,66 @@ function addRole() {
         if(err){
             throw err
         }
-        let departments = [];
-        res.forEach(department => departments.push(department.name))
-        inquirer
-        .prompt([
-            {
-                name: "newRole",
-                type: "input",
-                message: "What is the name of the new role?"
-            },
-            {
-                name: "newSalary",
-                type: "input",
-                message: "How much is the salary?"
-            },
-            {
-                name: "roleDepartment",
-                type: "list",
-                choices: departments,
-                message: "What department is the role in?"
-            }
-        ])
-        .then(function(response) {
-            let newRole = response.newRole
-            let newSalary = parseInt(response.newSalary)
-            let roleDepartment = response.roleDepartment
-            connection.query(
-                "SELECT id FROM department WHERE name = ?", [roleDepartment], function(err, res){
-                    if (err) {
-                        throw err
-                    }
-                    connection.query(
-                        "INSERT INTO role SET ?",
-                        {
-                        title: newRole,
-                        salary: newSalary,
-                        department_id: res[0].id
-                        },
-                        function(err) {
-                        if (err) {
-                            throw err;
-                        }
-                        console.log("")
-                        console.log("----------------------------------------------------------------------------------")
-                        console.log(`${newRole} was added as a role for ${roleDepartment}.`);
-                        console.log("----------------------------------------------------------------------------------")
-                        console.log("")
-                        start();
-                        }
-                    );
+        if(res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No departments found. You must add a department before adding a role.")
+            console.log("----------------------------------------------------------------------------------")
+            start();
+        } else {
+            let departments = [];
+            res.forEach(department => departments.push(department.name))
+            inquirer
+            .prompt([
+                {
+                    name: "newRole",
+                    type: "input",
+                    message: "What is the name of the new role?"
+                },
+                {
+                    name: "newSalary",
+                    type: "input",
+                    message: "How much is the salary?"
+                },
+                {
+                    name: "roleDepartment",
+                    type: "list",
+                    choices: departments,
+                    message: "What department is the role in?"
                 }
-            )
-        });
+            ])
+            .then(function(response) {
+                let newRole = response.newRole
+                let newSalary = parseInt(response.newSalary)
+                let roleDepartment = response.roleDepartment
+                connection.query(
+                    "SELECT id FROM department WHERE name = ?", [roleDepartment], function(err, res){
+                        if (err) {
+                            throw err
+                        }
+                        connection.query(
+                            "INSERT INTO role SET ?",
+                            {
+                            title: newRole,
+                            salary: newSalary,
+                            department_id: res[0].id
+                            },
+                            function(err) {
+                            if (err) {
+                                throw err;
+                            }
+                            console.log("")
+                            console.log("----------------------------------------------------------------------------------")
+                            console.log(`${newRole} was added as a role for ${roleDepartment}.`);
+                            console.log("----------------------------------------------------------------------------------")
+                            console.log("")
+                            start();
+                            }
+                        );
+                    }
+                )
+            });
+        }
     });
 };
 
@@ -337,75 +396,83 @@ function addEmployee() {
         if(err){
             throw err
         }
-        let roles = res;
-        let roleTitles = res.map(role => role.title)
-        connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS manager FROM employee", function(err, res) {
-            if(err){
-                throw err
-            }
-            let managers = res
-            let managerNames = managers.map(manager => manager.manager)
-            managerNames.push("None")
-            inquirer
-            .prompt([
-                {
-                    name: "firstName",
-                    type: "input",
-                    message: "What is the first name of the new employee?"
-                },
-                {
-                    name: "lastName",
-                    type: "input",
-                    message: "What is the last name of the new employee?"
-                },
-                {
-                    name: "employeeRole",
-                    type: "list",
-                    choices: roleTitles,
-                    message: "What is the role of the new employee?"
-                },
-                {
-                    name: "employeeManager",
-                    type: "list",
-                    choices: managerNames,
-                    message: "Who is the employee's manager?"
+        if(res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No roles found. You must add a role before adding an employee.")
+            console.log("----------------------------------------------------------------------------------")
+            start();
+        } else {
+            let roles = res;
+            let roleTitles = res.map(role => role.title)
+            connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS manager FROM employee", function(err, res) {
+                if(err){
+                    throw err
                 }
-            ])
-            .then(function(response) {
-                let firstName = response.firstName
-                let lastName = response.lastName
-                let employeeRole = roles.filter(role => role.title === response.employeeRole)
-                let employeeRoleId = employeeRole[0].id;
-                let employeeManager;
-                let employeeManagerId;
-                if (response.employeeManager === "None") {
-                    employeeManagerId = null
-                } else {
-                    employeeManager = managers.filter(manager => manager.manager === response.employeeManager)
-                    employeeManagerId = employeeManager[0].id
-                }
-                connection.query(
-                    "INSERT INTO employee SET ?",
+                let managers = res
+                let managerNames = managers.map(manager => manager.manager)
+                managerNames.push("None")
+                inquirer
+                .prompt([
                     {
-                    first_name: firstName,
-                    last_name: lastName,
-                    role_id: employeeRoleId,
-                    manager_id: employeeManagerId
+                        name: "firstName",
+                        type: "input",
+                        message: "What is the first name of the new employee?"
                     },
-                    function(err) {
-                    if (err) {
-                        throw err;
+                    {
+                        name: "lastName",
+                        type: "input",
+                        message: "What is the last name of the new employee?"
+                    },
+                    {
+                        name: "employeeRole",
+                        type: "list",
+                        choices: roleTitles,
+                        message: "What is the role of the new employee?"
+                    },
+                    {
+                        name: "employeeManager",
+                        type: "list",
+                        choices: managerNames,
+                        message: "Who is the employee's manager?"
                     }
-                    console.log("")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log(`${firstName} ${lastName} was added as a ${employeeRole[0].title}.`);
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log("")
-                    start();
+                ])
+                .then(function(response) {
+                    let firstName = response.firstName
+                    let lastName = response.lastName
+                    let employeeRole = roles.filter(role => role.title === response.employeeRole)
+                    let employeeRoleId = employeeRole[0].id;
+                    let employeeManager;
+                    let employeeManagerId;
+                    if (response.employeeManager === "None") {
+                        employeeManagerId = null
+                    } else {
+                        employeeManager = managers.filter(manager => manager.manager === response.employeeManager)
+                        employeeManagerId = employeeManager[0].id
                     }
-                );
+                    connection.query(
+                        "INSERT INTO employee SET ?",
+                        {
+                        first_name: firstName,
+                        last_name: lastName,
+                        role_id: employeeRoleId,
+                        manager_id: employeeManagerId
+                        },
+                        function(err) {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(`${firstName} ${lastName} was added as a ${employeeRole[0].title}.`);
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                        start();
+                        }
+                    );
+                });
             });
-        });
+        }
     });
 };
 
@@ -420,6 +487,73 @@ function updateEmployeeRole() {
             if(err){
                 throw err
             }
+            if(res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No employees found.")
+            console.log("----------------------------------------------------------------------------------")
+            start();
+            } else {
+                let employees = res;
+                let employeeNames = res.map(employee => employee.name)
+                inquirer
+                .prompt([
+                    {
+                        name: "updatingEmployee",
+                        type: "list",
+                        choices: employeeNames,
+                        message: "What employee would you like to update?"
+                    },
+                    {
+                        name: "newRole",
+                        type: "list",
+                        choices: roleTitles,
+                        message: "What is the new role for this employee?"
+                    }
+                ])
+                .then(function(response) {
+                    let updatingEmployee = employees.filter(employee => employee.name === response.updatingEmployee)
+                    let employeeId = updatingEmployee[0].id
+                    let employeeRole = roles.filter(role => role.title === response.newRole)
+                    let employeeRoleId = employeeRole[0].id;
+                    connection.query(
+                        "UPDATE employee SET ? WHERE ?",
+                        [
+                        {
+                            role_id: employeeRoleId
+                        },
+                        {
+                            id: employeeId
+                        }
+                        ],
+                        function(error) {
+                        if (error) throw err;
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(`${updatingEmployee[0].name} has been updated to a ${employeeRole[0].title}`);
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                        start();
+                        }
+                    );
+                });
+            };
+        });
+    });
+};
+
+function updateEmployeeManager() {
+    connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee", function(err, res) {
+        if(err){
+            throw err
+        }
+        if(res.length === 0){
+            console.log("")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No employees found.")
+            console.log("----------------------------------------------------------------------------------")
+            start();
+        } else {
             let employees = res;
             let employeeNames = res.map(employee => employee.name)
             inquirer
@@ -431,90 +565,39 @@ function updateEmployeeRole() {
                     message: "What employee would you like to update?"
                 },
                 {
-                    name: "newRole",
+                    name: "newManager",
                     type: "list",
-                    choices: roleTitles,
-                    message: "What is the new role for this employee?"
+                    choices: employeeNames,
+                    message: "Who is the new manager for this employee?"
                 }
             ])
             .then(function(response) {
                 let updatingEmployee = employees.filter(employee => employee.name === response.updatingEmployee)
                 let employeeId = updatingEmployee[0].id
-                let employeeRole = roles.filter(role => role.title === response.newRole)
-                let employeeRoleId = employeeRole[0].id;
+                let employeeManager = employees.filter(employee => employee.name === response.newManager)
+                let employeeManagerId = employeeManager[0].id;
                 connection.query(
                     "UPDATE employee SET ? WHERE ?",
                     [
-                      {
-                        role_id: employeeRoleId
-                      },
-                      {
+                        {
+                        manager_id: employeeManagerId
+                        },
+                        {
                         id: employeeId
-                      }
+                        }
                     ],
                     function(error) {
-                      if (error) throw err;
-                      console.log("")
-                      console.log("----------------------------------------------------------------------------------")
-                      console.log(`${updatingEmployee[0].name} has been updated to a ${employeeRole[0].title}`);
-                      console.log("----------------------------------------------------------------------------------")
-                      console.log("")
-                      start();
+                        if (error) throw err;
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(`${updatingEmployee[0].name} has been updated to report to ${employeeManager[0].name}.`);
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log("")
+                        start();
                     }
                 );
             });
-        });
-    });
-};
-
-function updateEmployeeManager() {
-    connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee", function(err, res) {
-        if(err){
-            throw err
-        }
-        let employees = res;
-        let employeeNames = res.map(employee => employee.name)
-        inquirer
-        .prompt([
-            {
-                name: "updatingEmployee",
-                type: "list",
-                choices: employeeNames,
-                message: "What employee would you like to update?"
-            },
-            {
-                name: "newManager",
-                type: "list",
-                choices: employeeNames,
-                message: "Who is the new manager for this employee?"
-            }
-        ])
-        .then(function(response) {
-            let updatingEmployee = employees.filter(employee => employee.name === response.updatingEmployee)
-            let employeeId = updatingEmployee[0].id
-            let employeeManager = employees.filter(employee => employee.name === response.newManager)
-            let employeeManagerId = employeeManager[0].id;
-            connection.query(
-                "UPDATE employee SET ? WHERE ?",
-                [
-                    {
-                    manager_id: employeeManagerId
-                    },
-                    {
-                    id: employeeId
-                    }
-                ],
-                function(error) {
-                    if (error) throw err;
-                    console.log("")
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log(`${updatingEmployee[0].name} has been updated to report to ${employeeManager[0].name}.`);
-                    console.log("----------------------------------------------------------------------------------")
-                    console.log("")
-                    start();
-                }
-            );
-        });
+        };
     });
 };
 
@@ -523,47 +606,56 @@ function DeleteDepartment() {
         if(err){
             throw err
         }
-        let departments = [];
-        res.forEach(department => departments.push(department.name))
-        inquirer
-        .prompt([
-            {
-            name: "selectedDepartment",
-            type: "list",
-            choices: departments,
-            message: "What department would you like to delete?"
-            },
-            {
-                name: "confirm",
+        if(res.length === 0){
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No departments found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let departments = [];
+            res.forEach(department => departments.push(department.name))
+            inquirer
+            .prompt([
+                {
+                name: "selectedDepartment",
                 type: "list",
-                choices: ["Yes", "Cancel"],
-                message: "Deleting a department will delete all job roles and employees in that department. Are you sure you want to delete this department?"
-            }
-        ]).then(function(response){
-            let confirm = response.confirm
-            let selectedDepartment = response.selectedDepartment
-            if (confirm === "Yes"){
-                connection.query("DELETE FROM department WHERE ?", 
-                [{
-                    name: selectedDepartment
-                }],
-                function(err, res) {
-                    if(err){
-                        throw err
-                    }
+                choices: departments,
+                message: "What department would you like to delete?"
+                },
+                {
+                    name: "confirm",
+                    type: "list",
+                    choices: ["Yes", "Cancel"],
+                    message: "Deleting a department will delete all job roles and employees in that department. Are you sure you want to delete this department?"
+                }
+            ]).then(function(response){
+                let confirm = response.confirm
+                let selectedDepartment = response.selectedDepartment
+                if (confirm === "Yes"){
+                    connection.query("DELETE FROM department WHERE ?", 
+                    [{
+                        name: selectedDepartment
+                    }],
+                    function(err, res) {
+                        if(err){
+                            throw err
+                        }
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(selectedDepartment +" deleted.")
+                        console.log("----------------------------------------------------------------------------------")
+                        start();
+                    });  
+                } else {
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedDepartment +" deleted.")
+                    console.log("Successfully canceled.")
                     console.log("----------------------------------------------------------------------------------")
-                });  
-            } else {
-                console.log("")
-                console.log("----------------------------------------------------------------------------------")
-                console.log("Successfully canceled.")
-                console.log("----------------------------------------------------------------------------------")
-            };
-            start();
-        });
+                    start();
+                };
+            });
+        };  
     });
 };
 
@@ -572,97 +664,115 @@ function DeleteRole() {
         if(err){
             throw err
         }
-        let roles = [];
-        res.forEach(role => roles.push(role.title))
-        inquirer
-        .prompt([
-            {
-            name: "selectedRole",
-            type: "list",
-            choices: roles,
-            message: "What role would you like to delete?"
-            },
-            {
-                name: "confirm",
+        if(res.length === 0){
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No roles found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let roles = [];
+            res.forEach(role => roles.push(role.title))
+            inquirer
+            .prompt([
+                {
+                name: "selectedRole",
                 type: "list",
-                choices: ["Yes", "Cancel"],
-                message: "Deleting a role will delete all employees in that role. Are you sure you want to delete this role?"
-            }
-        ]).then(function(response){
-            let confirm = response.confirm
-            let selectedRole = response.selectedRole
-            if (confirm === "Yes"){
-                connection.query("DELETE FROM role WHERE ?", 
-                [{
-                    title: selectedRole
-                }],
-                function(err, res) {
-                    if(err){
-                        throw err
-                    }
+                choices: roles,
+                message: "What role would you like to delete?"
+                },
+                {
+                    name: "confirm",
+                    type: "list",
+                    choices: ["Yes", "Cancel"],
+                    message: "Deleting a role will delete all employees in that role. Are you sure you want to delete this role?"
+                }
+            ]).then(function(response){
+                let confirm = response.confirm
+                let selectedRole = response.selectedRole
+                if (confirm === "Yes"){
+                    connection.query("DELETE FROM role WHERE ?", 
+                    [{
+                        title: selectedRole
+                    }],
+                    function(err, res) {
+                        if(err){
+                            throw err
+                        }
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(selectedRole +" deleted.")
+                        console.log("----------------------------------------------------------------------------------")
+                        start();
+                    });  
+                } else {
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedRole +" deleted.")
+                    console.log("Successfully canceled.")
                     console.log("----------------------------------------------------------------------------------")
-                });  
-            } else {
-                console.log("")
-                console.log("----------------------------------------------------------------------------------")
-                console.log("Successfully canceled.")
-                console.log("----------------------------------------------------------------------------------")
-            };
-            start();
-        });
+                    start();
+                };
+            });
+        };
     });
 };
 
 function DeleteEmployee() {
-    connection.query("SELECT id, CONCAT(first_name, last_name) AS name FROM employee", function(err, res) {
+    connection.query("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee", function(err, res) {
         if(err){
             throw err
         }
-        let employees = res;
-        let employeeNames = [];
-        res.forEach(employee => employeeNames.push(employee.name))
-        inquirer
-        .prompt([
-            {
-            name: "selectedEmployee",
-            type: "list",
-            choices: employeeNames,
-            message: "Which employee would you like to delete?"
-            },
-            {
-                name: "confirm",
+        if(res.length === 0){
+            console.log("----------------------------------------------------------------------------------")
+            console.log("No employees found.")
+            console.log("----------------------------------------------------------------------------------")
+            console.log("")
+            start();
+        } else {
+            let employees = res;
+            let employeeNames = [];
+            res.forEach(employee => employeeNames.push(employee.name))
+            inquirer
+            .prompt([
+                {
+                name: "selectedEmployee",
                 type: "list",
-                choices: ["Yes", "Cancel"],
-                message: "Are you sure you want to delete this employee?"
-            }
-        ]).then(function(response){
-            let confirm = response.confirm
-            let selectedEmployee = employees.filter(employee => employee.name === response.selectedEmployee);
-            let selectedEmployeeId = selectedEmployee[0].id
-            if (confirm === "Yes"){
-                connection.query("DELETE FROM employee WHERE ?", 
-                [{
-                   id: selectedEmployeeId
-                }],
-                function(err, res) {
-                    if(err){
-                        throw err
-                    }
+                choices: employeeNames,
+                message: "Which employee would you like to delete?"
+                },
+                {
+                    name: "confirm",
+                    type: "list",
+                    choices: ["Yes", "Cancel"],
+                    message: "Are you sure you want to delete this employee?"
+                }
+            ]).then(function(response){
+                let confirm = response.confirm
+                let selectedEmployee = employees.filter(employee => employee.name === response.selectedEmployee);
+                let selectedEmployeeId = selectedEmployee[0].id
+                if (confirm === "Yes"){
+                    connection.query("DELETE FROM employee WHERE ?", 
+                    [{
+                    id: selectedEmployeeId
+                    }],
+                    function(err, res) {
+                        if(err){
+                            throw err
+                        }
+                        console.log("")
+                        console.log("----------------------------------------------------------------------------------")
+                        console.log(selectedEmployee[0].name +" deleted.")
+                        console.log("----------------------------------------------------------------------------------")
+                        start();
+                    });  
+                } else {
                     console.log("")
                     console.log("----------------------------------------------------------------------------------")
-                    console.log(selectedEmployee[0].name +" deleted.")
+                    console.log("Successfully canceled.")
                     console.log("----------------------------------------------------------------------------------")
-                });  
-            } else {
-                console.log("")
-                console.log("----------------------------------------------------------------------------------")
-                console.log("Successfully canceled.")
-                console.log("----------------------------------------------------------------------------------")
-            };
-            start();
-        });
+                    start();
+                };
+            });
+        };
     });
 };   
