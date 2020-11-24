@@ -14,8 +14,9 @@
 This project is the twelfth homework assignment of the UW Coding Bootcamp. For this project I was asked to create an application that would track employees using MySQL. The application needed the ability to be able to add and view departments, roles, and employees as well as update employee roles. We were also given the challenge of taking this further by being able to view employees by managers and update their managers, delete departments, roles, and employees, and view the utilized budget of departments. I was able to make all of these functional. This application utilized the Inquirer and MySQL and Console.Table npm packages.
 
 ### Deployed Application
+<img src="deployed.gif" alt="gif of deployed page in use">
+
 [View this video on Google Drive](https://drive.google.com/file/d/1mOiRJwkBGZSegMi-PFcsChkJawuz-cvD/view)
-<img src="deployed.gif" alt=" of deployed page in use">
 
 ## Installation
 To install necessary dependencies, run the following command: npm i
